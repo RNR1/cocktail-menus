@@ -1,6 +1,6 @@
-# Welcome to your Expo app 👋
+# Cocktail Menus
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A way for me to take cocktail orders from my cocktail menu
 
 ## Get started
 
