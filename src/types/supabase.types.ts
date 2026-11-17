@@ -125,16 +125,19 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          customer: string
           id: number
           menu: number
         }
         Insert: {
           created_at?: string
+          customer: string
           id?: number
           menu: number
         }
         Update: {
           created_at?: string
+          customer?: string
           id?: number
           menu?: number
         }
