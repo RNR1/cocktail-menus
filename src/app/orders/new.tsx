@@ -1,26 +1,27 @@
 import { supabase } from '@/lib/supabase';
+import { Button, Host, Spacer } from '@expo/ui';
 import {
-	Button,
-	Column,
-	Host,
+	Form,
+	HStack,
 	Picker,
-	Row,
-	Spacer,
+	Section,
 	Text,
-	TextInput,
-	TextInputRef
-} from '@expo/ui';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+	TextField
+} from '@expo/ui/swift-ui';
+import { disabled, padding, tag } from '@expo/ui/swift-ui/modifiers';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Label, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 const NewOrderPage = () => {
-	const inputRef = useRef<TextInputRef>(null);
+	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const [name, setName] = useState('');
-	const [cocktail, setCocktail] = useState<number>(0);
+	const [cocktail, setCocktail] = useState<number>(1);
 
-	const { data } = useQuery({
+	const { data, isSuccess } = useQuery({
 		queryKey: ['menu-items'],
 		queryFn: async () => {
 			const { data, error } = await supabase
@@ -36,7 +37,7 @@ const NewOrderPage = () => {
 		}
 	});
 
-	const { mutate } = useMutation({
+	const { mutate, isPending } = useMutation({
 		mutationFn: async () => {
 			if (!name) return alert('Name is required');
 			const { data: order, error: orderError } = await supabase
@@ -50,31 +51,49 @@ const NewOrderPage = () => {
 				.insert({ order: order.id, item: cocktail });
 			if (itemError) throw itemError;
 			return order;
+		},
+		onSuccess: () => {
+			router.back();
+			queryClient.invalidateQueries({ queryKey: ['orders'] });
 		}
 	});
 
 	return (
-		<Host matchContents style={styles.container}>
-			<Column alignment='center' style={{ padding: 16 }}>
-				<Row alignment='center' spacing={12} style={{ padding: 16 }}>
-					<Text>Name:</Text>
-					<Spacer flexible />
-					<TextInput ref={inputRef} placeholder='Name' onChangeText={setName} />
-				</Row>
-				<Spacer />
-				<Row alignment='center' spacing={6} style={{ padding: 16 }}>
-					<Text>Item:</Text>
-					<Spacer flexible />
-					<Picker selectedValue={cocktail} onValueChange={setCocktail}>
-						{data?.map(({ id, item }) => (
-							<Picker.Item key={id} label={item.name} value={id} />
-						))}
-					</Picker>
-				</Row>
-				<Row>
-					<Button onPress={mutate} label='Click' />
-				</Row>
-			</Column>
+		<Host
+			// matchContents
+			style={{
+				flex: 1
+			}}>
+			<Form>
+				<Section
+					footer={
+						<HStack>
+							<Spacer />
+							<Button
+								modifiers={[padding({ top: 12 }), disabled(!name || !cocktail)]}
+								onPress={mutate}
+								label={isPending ? 'Submitting...' : 'Submit Order'}
+							/>
+						</HStack>
+					}>
+					<TextField placeholder='Name' onTextChange={setName} />
+					{isSuccess ? (
+						<>
+							<Label>Choose a cocktail</Label>
+							<Picker
+								label='Cocktail'
+								selection={cocktail}
+								onSelectionChange={setCocktail}>
+								{data?.map(({ id, item }) => (
+									<Text key={id} modifiers={[tag(id)]}>
+										{item.name}
+									</Text>
+								))}
+							</Picker>
+						</>
+					) : null}
+				</Section>
+			</Form>
 		</Host>
 	);
 };

@@ -128,18 +128,21 @@ export type Database = {
           customer: string
           id: number
           menu: number
+          status: Database["public"]["Enums"]["OrderStatus"]
         }
         Insert: {
           created_at?: string
           customer: string
           id?: number
           menu: number
+          status?: Database["public"]["Enums"]["OrderStatus"]
         }
         Update: {
           created_at?: string
           customer?: string
           id?: number
           menu?: number
+          status?: Database["public"]["Enums"]["OrderStatus"]
         }
         Relationships: []
       }
@@ -151,7 +154,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      OrderStatus: "Pending" | "Completed" | "Cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -278,6 +281,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      OrderStatus: ["Pending", "Completed", "Cancelled"],
+    },
   },
 } as const
