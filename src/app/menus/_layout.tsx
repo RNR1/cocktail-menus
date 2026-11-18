@@ -15,10 +15,22 @@ const MenusLayout = () => {
 			if (error) throw error;
 			return data;
 		},
-    select: data => data.at(0),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+		select: data => data.at(0),
+		staleTime: 1000 * 60 * 5 // 5 minutes
 	});
-	return <Stack screenOptions={{ headerTitle: data?.menu?.name ?? id }} />;
+	return (
+		<Stack>
+			<Stack.Screen
+				name='index'
+				options={{
+					title: 'Menus',
+					headerBackButtonDisplayMode: 'minimal',
+					headerBackTitle: 'Menus'
+				}}
+			/>
+			<Stack.Screen name='[id]' options={{ title: '', headerBackTitle: '' }} />
+		</Stack>
+	);
 };
 
 export default MenusLayout;

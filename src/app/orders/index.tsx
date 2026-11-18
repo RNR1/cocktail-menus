@@ -53,7 +53,7 @@ const Orders = () => {
 						label='New Order'
 						systemImage='plus'
 						modifiers={[
-							padding({ trailing: 24 }),
+							padding({ trailing: 32 }),
 							buttonStyle('glass'),
 							controlSize('extraLarge'),
 							labelStyle('iconOnly'),

@@ -1,81 +1,69 @@
-import { Link } from 'expo-router';
-import { Button, FlatList, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { StyleSheet } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
+import {
+	Button,
+	Host,
+	HStack,
+	List,
+	Section,
+	Spacer,
+	Text,
+	VStack
+} from '@expo/ui/swift-ui';
+import { font, frame } from '@expo/ui/swift-ui/modifiers';
 import { useQuery } from '@tanstack/react-query';
 
-
 export default function MenusScreen() {
-  const { data , error, isSuccess} = useQuery({
+	const router = useRouter();
+
+	const { data, error, isSuccess } = useQuery({
 		queryKey: ['menus'],
 		queryFn: async () => {
 			const { data, error } = await supabase.from('menus').select('*');
 			if (error) throw error;
 			return data;
-		},
+		}
 	});
 
+	return (
+		<Host style={styles.container}>
+			<VStack>
+				<Spacer />
+				<HStack>
+					<Spacer />
+					<VStack modifiers={[font({ size: 34 })]}>
+						<Text>🍸</Text>
+						<Text>Cocktail Menus</Text>
+					</VStack>
+					<Spacer />
+				</HStack>
 
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <ThemedText type="title">🍸</ThemedText>
-          <ThemedText type="title" style={styles.title}>
-            Cocktail Menus
-          </ThemedText>
-        </ThemedView>
-
-
-          <FlatList
-            data={data}
-            renderItem={({ item }) => (
-              <Link href={{ pathname: `/menus/[id]`, params: { id: item.id } }} asChild><Button title={item.name} /></Link>
-            )}
-          />
-
-
-      </SafeAreaView>
-    </ThemedView>
-  );
+				<List modifiers={[frame({ maxWidth: 600 })]}>
+					{data?.map(item => (
+						<Section key={item.id}>
+							<Button
+								label={item.name}
+								onPress={() =>
+									router.push({
+										pathname: `/menus/[id]`,
+										params: { id: item.id }
+									})
+								}
+							/>
+						</Section>
+					))}
+				</List>
+			</VStack>
+		</Host>
+	);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+	container: {
+		flex: 1,
+		justifyContent: 'center',
+		flexDirection: 'row'
+	}
 });
