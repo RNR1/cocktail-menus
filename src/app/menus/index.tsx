@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
-import { supabase } from '@/lib/supabase';
+import menusQuery from '@/queries/menus';
 import {
 	Button,
 	Host,
@@ -18,14 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 export default function MenusScreen() {
 	const router = useRouter();
 
-	const { data, error, isSuccess } = useQuery({
-		queryKey: ['menus'],
-		queryFn: async () => {
-			const { data, error } = await supabase.from('menus').select('*');
-			if (error) throw error;
-			return data;
-		}
-	});
+	const { data } = useQuery(menusQuery);
 
 	return (
 		<Host style={styles.container}>

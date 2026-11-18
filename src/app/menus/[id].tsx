@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import menuByIdQuery from '@/queries/menuById';
 import { Host, HStack, List, Section, Spacer, VStack } from '@expo/ui/swift-ui';
 import { frame } from '@expo/ui/swift-ui/modifiers';
 import { useQuery } from '@tanstack/react-query';
@@ -6,30 +6,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text } from 'react-native';
 
 const MenuScreen = () => {
-	const { id } = useLocalSearchParams();
-	const { data } = useQuery({
-		queryKey: ['menus', id],
-		queryFn: async () => {
-			const { data, error } = await supabase
-				.from('menus')
-				.select(
-					`
-					name,
-					items:"menu-items" (
-						id,
-						cocktail:item (
-							name
-						)
-					)`
-				)
-				.eq('id', Number(id))
-				.single();
-
-			if (error) throw error;
-			return data;
-		},
-		staleTime: 1000 * 60 * 5 // 5 minutes
-	});
+	const { id } = useLocalSearchParams<{ id: string }>();
+	const { data } = useQuery(menuByIdQuery(Number(id)));
 
 	return (
 		<Host style={styles.container}>

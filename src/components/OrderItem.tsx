@@ -1,8 +1,9 @@
 import { supabase } from '@/lib/supabase';
+import updateOrderStatusMutation from '@/mutations/updateOrderStatusMutation';
 import { Database } from '@/types/supabase.types';
 import { Button, Section, SwipeActions, Text } from '@expo/ui/swift-ui';
 import { tint } from '@expo/ui/swift-ui/modifiers';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 type OrderItemProps = {
 	id: number;
@@ -26,13 +27,7 @@ const mutationFn = async ({
 };
 
 const OrderItem = ({ id, customer, cocktail }: OrderItemProps) => {
-	const queryClient = useQueryClient();
-	const { mutate } = useMutation({
-		mutationFn,
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['orders'] });
-		}
-	});
+	const { mutate } = useMutation(updateOrderStatusMutation);
 
 	return (
 		<Section key={id} title={customer}>

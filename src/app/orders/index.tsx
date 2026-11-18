@@ -1,5 +1,5 @@
 import OrderItem from '@/components/OrderItem';
-import { supabase } from '@/lib/supabase';
+import ordersQuery from '@/queries/orders';
 import { Button, Host, HStack, List, Spacer, VStack } from '@expo/ui/swift-ui';
 import {
 	buttonBorderShape,
@@ -16,33 +16,7 @@ import { StyleSheet } from 'react-native';
 const Orders = () => {
 	const router = useRouter();
 
-	const { data } = useQuery({
-		queryKey: ['orders'],
-		queryFn: async () => {
-			const { data, error } = await supabase
-				.from('orders')
-				.select(
-					`
-    id,
-    customer,
-    status,
-    items:"order-items" (
-      id,
-      menu_item:item (
-        id,
-        cocktail:item (
-          id,
-          name
-        )
-			)
-    )
-  `
-				)
-				.eq('status', 'Pending');
-			if (error) throw error;
-			return data;
-		}
-	});
+	const { data } = useQuery(ordersQuery);
 
 	return (
 		<Host style={styles.host}>

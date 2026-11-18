@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+import createOrderMutation from '@/mutations/createOrderMutation';
+import menuByIdQuery from '@/queries/menuById';
 import { Button, Host, Spacer } from '@expo/ui';
 import {
 	Form,
@@ -9,58 +10,22 @@ import {
 	TextField
 } from '@expo/ui/swift-ui';
 import { disabled, padding, tag } from '@expo/ui/swift-ui/modifiers';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Label, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
 
 const NewOrderPage = () => {
 	const router = useRouter();
-	const queryClient = useQueryClient();
 
 	const [name, setName] = useState('');
 	const [cocktail, setCocktail] = useState<number>(1);
 
-	const { data, isSuccess } = useQuery({
-		queryKey: ['menu-items'],
-		queryFn: async () => {
-			const { data, error } = await supabase
-				.from('menu-items')
-				.select('id, menu ( name ), item( name )')
-				.eq('menu', 1);
+	const { data, isSuccess } = useQuery(menuByIdQuery(1));
 
-			if (error) {
-				console.log(error.message);
-				throw error;
-			}
-			return data;
-		}
-	});
-
-	const { mutate, isPending } = useMutation({
-		mutationFn: async () => {
-			if (!name) return alert('Name is required');
-			const { data: order, error: orderError } = await supabase
-				.from('orders')
-				.insert({ menu: 1, customer: name })
-				.select()
-				.single();
-			if (orderError) throw orderError;
-			const { error: itemError } = await supabase
-				.from('order-items')
-				.insert({ order: order.id, item: cocktail });
-			if (itemError) throw itemError;
-			return order;
-		},
-		onSuccess: () => {
-			router.back();
-			queryClient.invalidateQueries({ queryKey: ['orders'] });
-		}
-	});
+	const { mutate, isPending } = useMutation(createOrderMutation);
 
 	return (
 		<Host
-			// matchContents
 			style={{
 				flex: 1
 			}}>
@@ -71,7 +36,12 @@ const NewOrderPage = () => {
 							<Spacer />
 							<Button
 								modifiers={[padding({ top: 12 }), disabled(!name || !cocktail)]}
-								onPress={mutate}
+								onPress={() =>
+									mutate(
+										{ name, item: cocktail },
+										{ onSuccess: () => router.back() }
+									)
+								}
 								label={isPending ? 'Submitting...' : 'Submit Order'}
 							/>
 						</HStack>
@@ -84,9 +54,9 @@ const NewOrderPage = () => {
 								label='Cocktail'
 								selection={cocktail}
 								onSelectionChange={setCocktail}>
-								{data?.map(({ id, item }) => (
+								{data?.items.map(({ id, cocktail }) => (
 									<Text key={id} modifiers={[tag(id)]}>
-										{item.name}
+										{cocktail.name}
 									</Text>
 								))}
 							</Picker>
@@ -99,11 +69,3 @@ const NewOrderPage = () => {
 };
 
 export default NewOrderPage;
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center'
-	}
-});
