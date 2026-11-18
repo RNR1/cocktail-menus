@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Host, List, Section } from '@expo/ui/swift-ui';
+import { Host, List, Section, Spacer, VStack } from '@expo/ui/swift-ui';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text } from 'react-native';
@@ -32,13 +32,16 @@ const MenuScreen = () => {
 
 	return (
 		<Host style={styles.container}>
-			<Section title={data?.name}>
+			<VStack>
+				<Spacer />
 				<List>
-					{data?.items?.map(item => (
-						<Text key={item.id}>{item.cocktail.name}</Text>
-					))}
+					<Section title={data?.name}>
+						{data?.items?.map(item => (
+							<Text key={item.id}>{item.cocktail.name}</Text>
+						))}
+					</Section>
 				</List>
-			</Section>
+			</VStack>
 		</Host>
 	);
 };
