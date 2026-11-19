@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import orderCountQuery from '@/queries/orderCount';
 import ordersQuery from '@/queries/orders';
 import queryClient from '@/queries/queryClient';
 import { Database } from '@/types/supabase.types';
@@ -19,8 +20,11 @@ const updateOrderStatusMutation = mutationOptions({
 		if (error) throw error;
 		return data;
 	},
-	onSuccess: () => {
-		queryClient.invalidateQueries({ queryKey: ordersQuery.queryKey });
+	onSuccess: (_, { status }) => {
+		queryClient.invalidateQueries(ordersQuery);
+		if (status === 'Completed') {
+			queryClient.invalidateQueries(orderCountQuery('Completed'))
+		}
 	}
 });
 

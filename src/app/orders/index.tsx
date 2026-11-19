@@ -1,6 +1,15 @@
 import OrderItem from '@/components/OrderItem';
+import orderCountQuery from '@/queries/orderCount';
 import ordersQuery from '@/queries/orders';
-import { Button, Host, HStack, List, Spacer, VStack } from '@expo/ui/swift-ui';
+import {
+	Button,
+	Host,
+	HStack,
+	List,
+	Spacer,
+	Text,
+	VStack
+} from '@expo/ui/swift-ui';
 import {
 	buttonBorderShape,
 	buttonStyle,
@@ -16,7 +25,10 @@ import { StyleSheet } from 'react-native';
 const Orders = () => {
 	const router = useRouter();
 
-	const { data } = useQuery(ordersQuery);
+	const { data: pendingOrders } = useQuery(ordersQuery);
+	const { data: completedOrderCount = 0 } = useQuery(
+		orderCountQuery('Completed')
+	);
 
 	return (
 		<Host style={styles.host}>
@@ -36,10 +48,10 @@ const Orders = () => {
 						onPress={() => router.push('/orders/new')}
 					/>
 				</HStack>
-				{data?.length ? (
-					<VStack>
+				<VStack>
+					{pendingOrders?.length ? (
 						<List modifiers={[frame({ maxWidth: 600 })]}>
-							{data?.map(order => (
+							{pendingOrders?.map(order => (
 								<OrderItem
 									key={order.id}
 									id={order.id}
@@ -48,8 +60,14 @@ const Orders = () => {
 								/>
 							))}
 						</List>
-					</VStack>
-				) : null}
+					) : null}
+				</VStack>
+				<Spacer />
+				<HStack>
+					<Spacer />
+					<Text>Completed Orders: {completedOrderCount}</Text>
+					<Spacer />
+				</HStack>
 			</VStack>
 		</Host>
 	);

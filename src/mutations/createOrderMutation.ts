@@ -25,7 +25,7 @@ const createOrderMutation = mutationOptions({
 		return order;
 	},
 	onSuccess: () =>
-		queryClient.invalidateQueries({ queryKey: ordersQuery.queryKey })
+		queryClient.invalidateQueries(ordersQuery)
 });
 
 export default createOrderMutation;
